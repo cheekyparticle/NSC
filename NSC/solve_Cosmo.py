@@ -2,7 +2,8 @@ import numpy as np
 
 #import Qdecay_widths as QW
 
-import StandardCosmo as SC
+from . import StandardCosmo as SC 
+
 
 import sys
 
@@ -27,7 +28,7 @@ import scipy.optimize as op
 from scipy.optimize import root
 
 from scipy.optimize import fsolve
-import Qdecay_widths as QW
+from . import Qdecay_widths as QW
 
 
 
@@ -36,7 +37,7 @@ def rho_eq_rel(g, T):
 
 
 def Yeq_nr(mQ, T, g):
-    return ((45.0*g)/(2*np.pi**4*SC.gstar_Q(T, mQ, g))) * np.sqrt((np.pi)/(8))*(mQ/T)**(3/2)* np.exp(-mQ/T)
+    return ((45.0*g)/(2*np.pi**4*gstar_Q(T, mQ, g))) * np.sqrt((np.pi)/(8))*(mQ/T)**(3/2)* np.exp(-mQ/T)
 
 def gstarS_Q(T, mQ, gQ):
     Teq = 10*mQ
