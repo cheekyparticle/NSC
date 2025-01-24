@@ -234,7 +234,7 @@ def OmegaGW_preferred_axion_lam(k_values, mQ_p, TRH, nT, d_decay=6, lam=1.22e19,
     """
     # Precompute constants
     Hub0, invdil, Teq, Tdec, a0 = OmegaGW_preferred_axion_constant_lam(mQ_p, d_decay, lam)
-    print(invdil, Teq, Tdec)
+    #print(invdil, Teq, Tdec)
     results = []
     if Teq == 0:
         # If Teq == 0, return the result of OmegaGW for all k values
