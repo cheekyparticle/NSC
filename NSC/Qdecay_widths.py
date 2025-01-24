@@ -6,30 +6,9 @@ import numpy as np#you usually need numpy
 
 from sys import path as sysPath
 from sys import argv as argv
+from . import StandardCosmo as SC 
 
 
-import pandas as pd
-from scipy import interpolate
-
-gTab = pd.read_table("/home/andrew/Documents/Tools/Data_gstars/gstar.dat",  names=['T','gstar'])
-
-Ttab = gTab.iloc[:,0]
-gtab = gTab.iloc[:,1]
-tck  = interpolate.splrep(Ttab, gtab, s=0)
-
-def gstar(T): return interpolate.splev(T, tck, der=0)
-
-def dgstardT(T): return interpolate.splev(T, tck, der = 1)
-
-gSTab = pd.read_table("/home/andrew/Documents/Tools/Data_gstars/gstarS.dat",  names=['T','gstarS'])
-
-TStab = gSTab.iloc[:,0]
-gstab = gSTab.iloc[:,1]
-tckS  = interpolate.splrep(TStab, gstab, s=0)
-
-def gstarS(T): return interpolate.splev(T, tckS, der = 0)
-
-def dgstarSdT(T): return interpolate.splev(T, tckS, der = 1)
 
 
 GCF   = 6.70883e-39      # Gravitational constant in GeV^-2
