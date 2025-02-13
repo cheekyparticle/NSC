@@ -390,6 +390,12 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
 
         Temp = np.concatenate((Temp_sol_p1_bFO ,Temp_sol_p1_aFO), axis=0)
 
+        uafo = sol_p1_aFO.t
+
+
+        #    return rhor, rhoQ, sRAD, Temp, uafo, sRad_volume_aFO, rhoQ_aFO, rhor_aFO, ufin_aFO
+
+
     else: 
         lifetimeQ = 1/gamma
 
