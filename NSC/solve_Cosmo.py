@@ -406,7 +406,7 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
         params_input_p1_aFO = [Ti_aFO, ratioQ_aFO, mQ_p, gamma]
 
         sol_p1_aFO = solve_ivp(lambda x, y : eqs_after_FO(x, y, params_input_p1_aFO ), [uin_aFO, ufin_aFO],
-                            y0=[np.log(1.0), np.log(1.0)], atol=1e-14, rtol=1e-10, 
+                            y0=[np.log(1.0), np.log(1.0)], atol=1e-7, rtol=1e-8, 
                             dense_output=True, method='BDF')
 
         Temp_sol_p1_aFO = Ti_aFO*np.exp(sol_p1_aFO.y[1])*np.exp(-sol_p1_aFO.t)
@@ -417,6 +417,9 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
         sRad_sol_p1_aFO = ((2*np.pi**2)/(45))*np.vectorize(gstarS_Q)(Temp_sol_p1_aFO, mQ_p, 12)* Temp_sol_p1_aFO**3
 
         sRad_volume_aFO = sRad_sol_p1_aFO * np.exp(3* sol_p1_aFO.t)
+
+        uafo = sol_p1_aFO.t
+
 
         if Temp_sol_p1_aFO[-1] < 1e-3: 
 
@@ -430,25 +433,34 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
 
             Temp = np.concatenate((Temp_sol_p1_bFO ,Temp_sol_p1_aFO), axis=0)
 
+
         else: 
-            print("final temp %.3e\n" % (Temp_sol_p1_aFO[-1]))
+            print("final temp above BBN %.3e\n" % (Temp_sol_p1_aFO[-1]))
             Ti_adec = Temp_sol_p1_aFO[-1]
             Rin_adec = 1.0
             Tfin_adec = 1e-3 # 10 Tsig 
             Rfin_adec = (np.vectorize(SC.gstarS)(Ti_adec)/np.vectorize(SC.gstarS)(Tfin_adec))**(1/3) * ((Ti_adec*Rin_adec)/(Tfin_adec))
 
-            uin_aFO, ufin_aFO = 0.0, np.log(Rfin_aFO/Rin_aFO) 
+            uin_aFO, ufin_aFO = 0.0, np.log(Rfin_adec/Rin_adec) 
 
             params_input_p1_adec = [Ti_adec]
 
             sol_p1_adec = solve_ivp(lambda x, y : eqs_after_decay(x, y, params_input_p1_adec ), [uin_aFO, ufin_aFO],
-                                y0=[np.log(1.0)], method='BDF')
+                                y0=[np.log(1.0)], atol=1e-5, rtol=1e-5, method='LSODA')
 
             Temp_sol_p1_adec = Ti_adec*np.exp(sol_p1_adec.y[0])*np.exp(-sol_p1_adec.t)
 
             rhor_adec = (np.pi**2/30)*np.vectorize(SC.gstar)(Temp_sol_p1_adec)*Temp_sol_p1_adec**4
             rhoQ_adec = np.zeros(np.size(sol_p1_adec.t))
             sRad_sol_p1_adec = SC.sRAD(Temp_sol_p1_adec)
+            
+            uadec = np.array([sol_p1_adec.t[i] + sol_p1_aFO.t[-1] for i in range(len(sol_p1_adec.t[:]))])
+
+            # print(len(uadec))
+            # print(len(sRad_sol_p1_adec))
+
+            sRad_volume_adec = sRad_sol_p1_adec * np.exp(3* uadec)
+
 
             rhor = np.concatenate((rhor_bFO, rhor_aFO, rhor_adec), axis=0)
 
@@ -457,8 +469,15 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
             sRAD = np.concatenate((sRad_sol_p1_bFO, sRad_sol_p1_aFO, sRad_sol_p1_adec), axis=0)
 
             Temp = np.concatenate((Temp_sol_p1_bFO ,Temp_sol_p1_aFO, Temp_sol_p1_adec), axis=0)
+
+            uafo = np.concatenate((uafo, uadec ), axis=0)
+
+            sRad_volume_aFO = np.concatenate((sRad_volume_aFO, sRad_volume_adec ))
+
+            rhor_aFO = np.concatenate((rhor_aFO, rhor_adec), axis=0 )
+            rhoQ_aFO = np.concatenate((rhoQ_aFO, rhoQ_adec), axis=0)
         
-    return rhor, rhoQ, sRAD, Temp, sol_p1_aFO.t, sRad_volume_aFO, rhoQ_aFO, rhor_aFO, ufin_aFO
+    return rhor, rhoQ, sRAD, Temp, uafo, sRad_volume_aFO, rhoQ_aFO, rhor_aFO, ufin_aFO
 
 
 def GW_input_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0): 
@@ -582,7 +601,7 @@ def GW_input_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
             Tfin_adec = 1e-3 # 10 Tsig 
             Rfin_adec = (np.vectorize(SC.gstarS)(Ti_adec)/np.vectorize(SC.gstarS)(Tfin_adec))**(1/3) * ((Ti_adec*Rin_adec)/(Tfin_adec))
 
-            uin_aFO, ufin_aFO = 0.0, np.log(Rfin_aFO/Rin_aFO) 
+            uin_aFO, ufin_aFO = 0.0, np.log(Rfin_adec/Rin_adec) 
 
             params_input_p1_adec = [Ti_adec]
 
