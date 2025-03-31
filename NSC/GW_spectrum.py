@@ -1,8 +1,9 @@
 from scipy.special import spherical_jn
-import ACcosmo.StandardCosmo as SC
+#import ACcosmo.StandardCosmo as SC
+from NSC import StandardCosmo as SC
 import numpy as np
-import solve_Cosmo as TEQ
-import Qdecay_widths as QW
+from NSC import solve_Cosmo as TEQ
+from NSC import Qdecay_widths as QW
 
 
 

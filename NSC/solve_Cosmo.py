@@ -123,6 +123,47 @@ def eqs_FO_Y(x, y, params):
     
     return [dYchi]
 
+def eqs_FO_Y_decay(x, y, params):
+    ''' x : logx, Ychi: [Yield chi], Ya : [Yield ax] '''
+    
+    Ychi = y[0]
+
+    
+    
+    mQ = params[0]
+    GAMMA = params[1]
+
+    gQ = 12
+    Temp = mQ/np.exp(x)
+
+    
+    
+        
+    rhoRAD = (np.pi**2/30)*gstar_Q(Temp, mQ, gQ)*Temp**4
+    
+    sRAD = ((2*np.pi**2)/(45))*gstarS_Q(Temp, mQ, gQ)* Temp**3
+    
+    
+    
+    Ychi_eq = neq_gen_full(gQ, mQ, Temp)/sRAD
+    
+    
+    
+    #rhoa = ga/30 * ((np.pi**(7/2))/(zeta(3)))**(4/3)*(na/ga)**(4/3)
+        
+    H =  np.sqrt((8/3) * np.pi * SC.GCF * (rhoRAD ))
+
+    deltah = 1 + (1/3)*(Temp/gstarS_Q(Temp, mQ, gQ))*SC.dgstarSdT(Temp)
+    sgv = sigv(mQ)
+    
+    
+    dYchi = deltah*((sgv*sRAD)/(H)) *(Ychi_eq**2 - Ychi * Ychi) + deltah*((GAMMA)/(H))*(Ychi_eq**2/Ychi - Ychi)
+    
+    
+    
+    return [dYchi]
+
+
 
 def eqs_after_FO(x, y, params):
     ''' x : u, y: [log(fQ), log(fR)] '''
@@ -325,13 +366,17 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
     
     Tfin_bFO = mQ_p/100 # 10 Tsig 
 
-    params_input_FO = [mQ_p]
+
+    gamma = QW.Gamma_func_lam(mQ_p, dim=d_decay, lam=lam)
+    TEND = QW.tend_func_lam(mQ_p, dim=d_decay, lam=lam)
+
+    params_input_FO = [mQ_p, gamma]
     
-    sol_p1_bFO = solve_ivp(lambda x, y : eqs_FO_Y(x, y,
+    sol_p1_bFO = solve_ivp(lambda x, y : eqs_FO_Y_decay(x, y,
                                                   params_input_FO ),
                            [np.log(mQ_p/Ti_bFO), np.log(mQ_p/Tfin_bFO)],
                            y0=[neq_gen_full(12.0, mQ_p,Ti_bFO)/sRADi_bFO,], 
-                           dense_output=True, atol=1e-10, rtol=1e-10, method='BDF')
+                           dense_output=True, atol=1e-12, rtol=1e-12, method='BDF')
     
     Temp_sol_p1_bFO = mQ_p/np.exp(sol_p1_bFO.t)
 
@@ -368,10 +413,10 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
 
         uin_aFO, ufin_aFO = 0.0, np.log(Rfin_aFO/Rin_aFO) 
 
-        params_input_p1_aFO = [Ti_aFO]
+        params_input_p1_aFO = [Ti_aFO, gamma]
 
         sol_p1_aFO = solve_ivp(lambda x, y : eqs_after_decay(x, y, params_input_p1_aFO ), [uin_aFO, ufin_aFO],
-                            y0=[np.log(1.0)], method='BDF')
+                            y0=[np.log(1.0)], dense_output=True, atol=1e-10, rtol=1e-10, method='BDF')
 
         Temp_sol_p1_aFO = Ti_aFO*np.exp(sol_p1_aFO.y[0])*np.exp(-sol_p1_aFO.t)
 
@@ -427,7 +472,7 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
         uafo = sol_p1_aFO.t
 
 
-        if Temp_sol_p1_aFO[-1] < 1e-3: 
+        if Temp_sol_p1_aFO[-1] < 1e-4: 
 
             print("final temp %.3e\n" % (Temp_sol_p1_aFO[-1]))
             rhor = np.concatenate((rhor_bFO, rhor_aFO), axis=0)
@@ -444,7 +489,7 @@ def Track_all_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
             print("final temp above BBN %.3e\n" % (Temp_sol_p1_aFO[-1]))
             Ti_adec = Temp_sol_p1_aFO[-1]
             Rin_adec = 1.0
-            Tfin_adec = 1e-3 # 10 Tsig 
+            Tfin_adec = 1e-4 # 10 Tsig 
             Rfin_adec = (np.vectorize(SC.gstarS)(Ti_adec)/np.vectorize(SC.gstarS)(Tfin_adec))**(1/3) * ((Ti_adec*Rin_adec)/(Tfin_adec))
 
             uin_aFO, ufin_aFO = 0.0, np.log(Rfin_adec/Rin_adec) 
