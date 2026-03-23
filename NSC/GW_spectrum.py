@@ -153,20 +153,20 @@ def PT_func(k, nT, r=0.035, Ask= 2.0989e-9, kstar=0.05):
     return r * Ask * (k/kstar)**(nT)
 
 
-def OmegaGW(k, TRH, nT, h=0.7):
+def OmegaGW(k, TRH, nT, h=0.7, r=0.035):
     a0 = 1 
     Hub0 = h * (9.777)**(-1) * 3.168e-17
 
     # return (1/12)*(k/(a0 * 2.2e-4))**2 * T2T(k, TRH) * PT_func(k,nT)
-    return (1/12)*(k/(a0 * Hub0))**2 * T2T(k, TRH) * PT_func(k,nT)
+    return (1/12)*(k/(a0 * Hub0))**2 * T2T(k, TRH) * PT_func(k,nT, r=r)
 
 
-def OmegaGW_IMD(k,Tdec, Teq,  TRH, nT, h=0.7):
+def OmegaGW_IMD(k,Tdec, Teq,  TRH, nT, h=0.7, r=0.035):
     a0 = 1 
     Hub0 = h * (9.777)**(-1) * 3.168e-17
 
     # return (1/12)*(k/(a0 * 2.2e-4))**2 * T2T(k, TRH) * PT_func(k,nT)
-    return (1/12)*(k/(a0 * Hub0))**2 * T2TIMD(k, Tdec, Teq, TRH) * PT_func(k,nT)
+    return (1/12)*(k/(a0 * Hub0))**2 * T2TIMD(k, Tdec, Teq, TRH) * PT_func(k,nT, r=r)
 
 def OmegaGW_IMD_new(k,Tdec, Teq,  TRH, nT, h=0.7):
     a0 = 1 
