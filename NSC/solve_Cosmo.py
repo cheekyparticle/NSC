@@ -682,3 +682,6 @@ def GW_input_lam(mQ_p , d_decay = 6, lam=1.22e19, ratio_Ti=1.0):
         
     
     return sRad_volume_aFO[-1]/sRad_volume_aFO[0] , Teq, Tdec
+
+
+
